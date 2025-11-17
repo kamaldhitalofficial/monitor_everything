@@ -4,7 +4,7 @@ Comprehensive pre-commit validation tool with code quality, testing, and securit
 
 ## Features
 
-- [ ] Basic CLI structure with Click
+- [x] Basic CLI structure with Click
 - [ ] Configuration management (global + local)
 - [ ] Interactive setup wizard
 - [ ] Git utilities and branch detection
