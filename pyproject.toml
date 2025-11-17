@@ -1,0 +1,15 @@
+[project]
+name = "monitor-everything"
+version = "0.1.0"
+description = "Comprehensive pre-commit validation tool with code quality, testing, and security checks"
+requires-python = ">=3.13"
+dependencies = [
+    "click>=8.1.7",
+]
+
+[project.scripts]
+me = "monitor_everything.main:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
