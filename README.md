@@ -6,7 +6,7 @@ Comprehensive pre-commit validation tool with code quality, testing, and securit
 
 - [x] Basic CLI structure with Click
 - [x] Configuration management (global + local)
-- [ ] Interactive setup wizard
+- [x] Interactive setup wizard
 - [ ] Git utilities and branch detection
 - [ ] Check framework and registry system
 - [ ] Code quality checks (Ruff, Black, Mypy)
