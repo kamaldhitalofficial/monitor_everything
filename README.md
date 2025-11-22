@@ -8,7 +8,7 @@ Comprehensive pre-commit validation tool with code quality, testing, and securit
 - [x] Configuration management (global + local)
 - [x] Interactive setup wizard
 - [x] Git utilities and branch detection
-- [ ] Check framework and registry system
+- [x] Check framework and registry system
 - [ ] Code quality checks (Ruff, Black, Mypy)
 - [ ] Test execution check (Pytest)
 - [ ] Security checks (secrets, file size)
