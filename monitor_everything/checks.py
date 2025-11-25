@@ -60,4 +60,154 @@ class BranchAwarenessCheck(Check):
                 details=[]
             )
 
+class RuffCheck(Check):
+    def __init__(self):
+        super().__init__("Ruff Linting")
+    
+    def run(self, files: List[str]) -> CheckOutput:
+        import subprocess
+        import shutil
+        
+        if not shutil.which("ruff"):
+            return CheckOutput(
+                result=CheckResult.WARN,
+                message="Ruff not installed",
+                details=["Install with: uv pip install ruff"]
+            )
+        
+        python_files = [f for f in files if f.endswith(".py")]
+        if not python_files:
+            return CheckOutput(
+                result=CheckResult.PASS,
+                message="No Python files to check",
+                details=[]
+            )
+        
+        try:
+            result = subprocess.run(
+                ["ruff", "check"] + python_files,
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode == 0:
+                return CheckOutput(
+                    result=CheckResult.PASS,
+                    message="No linting issues found",
+                    details=[]
+                )
+            else:
+                return CheckOutput(
+                    result=CheckResult.FAIL,
+                    message="Linting issues found",
+                    details=result.stdout.strip().split("\n")
+                )
+        except Exception as e:
+            return CheckOutput(
+                result=CheckResult.FAIL,
+                message=f"Error running ruff: {str(e)}",
+                details=[]
+            )
+
+class BlackCheck(Check):
+    def __init__(self):
+        super().__init__("Black Formatting")
+    
+    def run(self, files: List[str]) -> CheckOutput:
+        import subprocess
+        import shutil
+        
+        if not shutil.which("black"):
+            return CheckOutput(
+                result=CheckResult.WARN,
+                message="Black not installed",
+                details=["Install with: uv pip install black"]
+            )
+        
+        python_files = [f for f in files if f.endswith(".py")]
+        if not python_files:
+            return CheckOutput(
+                result=CheckResult.PASS,
+                message="No Python files to check",
+                details=[]
+            )
+        
+        try:
+            result = subprocess.run(
+                ["black", "--check"] + python_files,
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode == 0:
+                return CheckOutput(
+                    result=CheckResult.PASS,
+                    message="All files formatted correctly",
+                    details=[]
+                )
+            else:
+                return CheckOutput(
+                    result=CheckResult.FAIL,
+                    message="Formatting issues found",
+                    details=result.stderr.strip().split("\n")
+                )
+        except Exception as e:
+            return CheckOutput(
+                result=CheckResult.FAIL,
+                message=f"Error running black: {str(e)}",
+                details=[]
+            )
+
+class MypyCheck(Check):
+    def __init__(self):
+        super().__init__("Mypy Type Checking")
+    
+    def run(self, files: List[str]) -> CheckOutput:
+        import subprocess
+        import shutil
+        
+        if not shutil.which("mypy"):
+            return CheckOutput(
+                result=CheckResult.WARN,
+                message="Mypy not installed",
+                details=["Install with: uv pip install mypy"]
+            )
+        
+        python_files = [f for f in files if f.endswith(".py")]
+        if not python_files:
+            return CheckOutput(
+                result=CheckResult.PASS,
+                message="No Python files to check",
+                details=[]
+            )
+        
+        try:
+            result = subprocess.run(
+                ["mypy"] + python_files,
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode == 0:
+                return CheckOutput(
+                    result=CheckResult.PASS,
+                    message="No type errors found",
+                    details=[]
+                )
+            else:
+                return CheckOutput(
+                    result=CheckResult.FAIL,
+                    message="Type errors found",
+                    details=result.stdout.strip().split("\n")
+                )
+        except Exception as e:
+            return CheckOutput(
+                result=CheckResult.FAIL,
+                message=f"Error running mypy: {str(e)}",
+                details=[]
+            )
+
 registry.register("branch_awareness", BranchAwarenessCheck)
+registry.register("linting", RuffCheck)
+registry.register("formatting", BlackCheck)
+registry.register("type_checking", MypyCheck)

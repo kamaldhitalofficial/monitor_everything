@@ -46,3 +46,36 @@ def test_registry_has_branch_awareness():
     assert "branch_awareness" in registry.list_available()
     check_class = registry.get("branch_awareness")
     assert check_class == BranchAwarenessCheck
+
+def test_ruff_check_no_python_files():
+    from monitor_everything.checks import RuffCheck
+    import shutil
+    
+    check = RuffCheck()
+    result = check.run(["test.txt", "test.js"])
+    
+    if shutil.which("ruff"):
+        assert result.result == CheckResult.PASS
+        assert "No Python files" in result.message
+    else:
+        assert result.result == CheckResult.WARN
+        assert "not installed" in result.message
+
+def test_black_check_no_python_files():
+    from monitor_everything.checks import BlackCheck
+    check = BlackCheck()
+    result = check.run(["test.txt", "test.js"])
+    assert result.result == CheckResult.PASS
+    assert "No Python files" in result.message
+
+def test_mypy_check_no_python_files():
+    from monitor_everything.checks import MypyCheck
+    check = MypyCheck()
+    result = check.run(["test.txt", "test.js"])
+    assert result.result == CheckResult.PASS
+    assert "No Python files" in result.message
+
+def test_registry_has_all_checks():
+    assert "linting" in registry.list_available()
+    assert "formatting" in registry.list_available()
+    assert "type_checking" in registry.list_available()
