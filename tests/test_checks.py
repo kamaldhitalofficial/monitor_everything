@@ -79,3 +79,18 @@ def test_registry_has_all_checks():
     assert "linting" in registry.list_available()
     assert "formatting" in registry.list_available()
     assert "type_checking" in registry.list_available()
+    assert "tests" in registry.list_available()
+
+def test_pytest_check_runs():
+    from monitor_everything.checks import PytestCheck
+    import shutil
+    
+    check = PytestCheck()
+    
+    if not shutil.which("pytest"):
+        result = check.run([])
+        assert result.result == CheckResult.WARN
+        assert "not installed" in result.message
+    else:
+        # Just verify the check can be instantiated
+        assert check.name == "Pytest Tests"

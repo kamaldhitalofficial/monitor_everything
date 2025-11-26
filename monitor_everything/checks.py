@@ -211,3 +211,49 @@ registry.register("branch_awareness", BranchAwarenessCheck)
 registry.register("linting", RuffCheck)
 registry.register("formatting", BlackCheck)
 registry.register("type_checking", MypyCheck)
+
+class PytestCheck(Check):
+    def __init__(self):
+        super().__init__("Pytest Tests")
+    
+    def run(self, files: List[str]) -> CheckOutput:
+        import subprocess
+        import shutil
+        
+        if not shutil.which("pytest"):
+            return CheckOutput(
+                result=CheckResult.WARN,
+                message="Pytest not installed",
+                details=["Install with: uv pip install pytest"]
+            )
+        
+        try:
+            result = subprocess.run(
+                ["pytest", "-v"],
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode == 0:
+                lines = result.stdout.strip().split("\n")
+                summary = [l for l in lines if "passed" in l]
+                return CheckOutput(
+                    result=CheckResult.PASS,
+                    message="All tests passed",
+                    details=summary
+                )
+            else:
+                lines = result.stdout.strip().split("\n")
+                return CheckOutput(
+                    result=CheckResult.FAIL,
+                    message="Tests failed",
+                    details=lines[-10:]
+                )
+        except Exception as e:
+            return CheckOutput(
+                result=CheckResult.FAIL,
+                message=f"Error running pytest: {str(e)}",
+                details=[]
+            )
+
+registry.register("tests", PytestCheck)
