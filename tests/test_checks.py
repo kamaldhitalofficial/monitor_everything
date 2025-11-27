@@ -94,3 +94,40 @@ def test_pytest_check_runs():
     else:
         # Just verify the check can be instantiated
         assert check.name == "Pytest Tests"
+
+def test_security_check_no_issues(tmp_path):
+    from monitor_everything.checks import SecurityCheck
+    
+    test_file = tmp_path / "test.py"
+    test_file.write_text("print('hello world')")
+    
+    check = SecurityCheck()
+    result = check.run([str(test_file)])
+    
+    assert result.result == CheckResult.PASS
+    assert "No security issues" in result.message
+
+def test_security_check_detects_secrets(tmp_path):
+    from monitor_everything.checks import SecurityCheck
+    
+    test_file = tmp_path / "config.py"
+    test_file.write_text('API_KEY = "sk_live_1234567890abcdefghij"')
+    
+    check = SecurityCheck()
+    result = check.run([str(test_file)])
+    
+    assert result.result == CheckResult.FAIL
+    assert len(result.details) > 0
+    assert "API Key" in result.details[0]
+
+def test_security_check_large_file(tmp_path):
+    from monitor_everything.checks import SecurityCheck
+    
+    test_file = tmp_path / "large.bin"
+    test_file.write_bytes(b"x" * (11 * 1024 * 1024))
+    
+    check = SecurityCheck()
+    result = check.run([str(test_file)])
+    
+    assert result.result == CheckResult.FAIL
+    assert "Large file" in result.details[0]

@@ -257,3 +257,59 @@ class PytestCheck(Check):
             )
 
 registry.register("tests", PytestCheck)
+
+class SecurityCheck(Check):
+    def __init__(self):
+        super().__init__("Security Checks")
+        self.secret_patterns = [
+            (r'(?i)(api[_-]?key|apikey)\s*[:=]\s*["\']?([a-zA-Z0-9_\-]{20,})', "API Key"),
+            (r'(?i)(secret[_-]?key|secretkey)\s*[:=]\s*["\']?([a-zA-Z0-9_\-]{20,})', "Secret Key"),
+            (r'(?i)(password)\s*[:=]\s*["\']([^"\']{8,})', "Password"),
+            (r'(?i)(token)\s*[:=]\s*["\']?([a-zA-Z0-9_\-]{20,})', "Token"),
+            (r'(?i)(aws[_-]?access[_-]?key[_-]?id)\s*[:=]\s*["\']?([A-Z0-9]{20})', "AWS Access Key"),
+            (r'(?i)(aws[_-]?secret[_-]?access[_-]?key)\s*[:=]\s*["\']?([a-zA-Z0-9/+=]{40})', "AWS Secret Key"),
+        ]
+        self.max_file_size = 10 * 1024 * 1024  # 10MB
+    
+    def run(self, files: List[str]) -> CheckOutput:
+        import re
+        import os
+        
+        issues = []
+        
+        for file_path in files:
+            if not os.path.exists(file_path):
+                continue
+            
+            # Check file size
+            file_size = os.path.getsize(file_path)
+            if file_size > self.max_file_size:
+                size_mb = file_size / (1024 * 1024)
+                issues.append(f"{file_path}: Large file ({size_mb:.1f}MB)")
+            
+            # Check for secrets in text files
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    for pattern, secret_type in self.secret_patterns:
+                        matches = re.finditer(pattern, content)
+                        for match in matches:
+                            line_num = content[:match.start()].count('\n') + 1
+                            issues.append(f"{file_path}:{line_num}: Possible {secret_type} detected")
+            except (UnicodeDecodeError, PermissionError):
+                pass
+        
+        if issues:
+            return CheckOutput(
+                result=CheckResult.FAIL,
+                message=f"Security issues found ({len(issues)})",
+                details=issues
+            )
+        else:
+            return CheckOutput(
+                result=CheckResult.PASS,
+                message="No security issues found",
+                details=[]
+            )
+
+registry.register("security", SecurityCheck)
