@@ -11,7 +11,7 @@ Comprehensive pre-commit validation tool with code quality, testing, and securit
 - [x] Check framework and registry system
 - [x] Code quality checks (Ruff, Black, Mypy)
 - [x] Test execution check (Pytest)
-- [ ] Security checks (secrets, file size)
+- [x] Security checks (secrets, file size)
 - [ ] Check execution engine
 - [ ] Interactive prompt system
 - [ ] Manual check command
