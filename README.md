@@ -14,7 +14,7 @@ Comprehensive pre-commit validation tool with code quality, testing, and securit
 - [x] Security checks (secrets, file size)
 - [x] Check execution engine
 - [x] Interactive prompt system
-- [ ] Manual check command
+- [x] Manual check command
 - [ ] Git hook installation
 - [ ] Git alias setup (gc command)
 - [ ] Config management commands
