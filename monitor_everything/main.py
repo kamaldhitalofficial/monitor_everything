@@ -57,7 +57,34 @@ def setup():
 @cli.command()
 def check():
     """Run all enabled checks on staged files"""
-    click.echo("Check command coming soon...")
+    from monitor_everything.config import Config
+    from monitor_everything.runner import CheckRunner
+    from monitor_everything.prompt import display_results, prompt_user_action
+    from monitor_everything.git_utils import is_git_repo
+    import sys
+    
+    if not is_git_repo():
+        click.echo("Error: Not a git repository")
+        sys.exit(1)
+    
+    config = Config()
+    runner = CheckRunner(config)
+    
+    click.echo("Running checks...")
+    results = runner.run_all_checks()
+    
+    display_results(results)
+    
+    if runner.should_block(results):
+        sys.exit(1)
+    
+    has_issues = any(c['result'].value == 'fail' for c in results['checks'])
+    if has_issues:
+        if not prompt_user_action(results):
+            sys.exit(1)
+    
+    click.echo("\n✓ All checks passed!")
+    sys.exit(0)
 
 @cli.group()
 def config():
