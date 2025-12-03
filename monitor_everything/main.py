@@ -94,7 +94,37 @@ def config():
 @config.command(name="list")
 def config_list():
     """Show current configuration"""
-    click.echo("Config list coming soon...")
+    from monitor_everything.config import Config
+    import json
+    
+    config = Config()
+    click.echo(json.dumps(config.data, indent=2))
+
+@cli.command(name="install-hook")
+def install_hook_cmd():
+    """Install pre-commit git hook"""
+    from monitor_everything.hooks import install_hook
+    
+    success, message = install_hook()
+    if success:
+        click.echo(f"✓ {message}")
+    else:
+        click.echo(f"✗ {message}")
+        import sys
+        sys.exit(1)
+
+@cli.command(name="uninstall-hook")
+def uninstall_hook_cmd():
+    """Uninstall pre-commit git hook"""
+    from monitor_everything.hooks import uninstall_hook
+    
+    success, message = uninstall_hook()
+    if success:
+        click.echo(f"✓ {message}")
+    else:
+        click.echo(f"✗ {message}")
+        import sys
+        sys.exit(1)
 
 if __name__ == "__main__":
     cli()
