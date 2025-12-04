@@ -62,3 +62,58 @@ def test_uninstall_hook_no_hook(tmp_path, monkeypatch):
     success, message = uninstall_hook()
     assert success == False
     assert "No pre-commit hook found" in message
+
+def test_install_alias_local(tmp_path, monkeypatch):
+    from monitor_everything.hooks import install_alias
+    
+    monkeypatch.chdir(tmp_path)
+    subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
+    
+    success, message = install_alias(global_alias=False)
+    assert success == True
+    assert "installed locally" in message
+    
+    result = subprocess.run(
+        ["git", "config", "--local", "alias.gc"],
+        capture_output=True,
+        text=True
+    )
+    assert "me check" in result.stdout
+
+def test_install_alias_global():
+    from monitor_everything.hooks import install_alias, uninstall_alias
+    
+    success, message = install_alias(global_alias=True)
+    assert success == True
+    assert "installed globally" in message
+    
+    result = subprocess.run(
+        ["git", "config", "--global", "alias.gc"],
+        capture_output=True,
+        text=True
+    )
+    assert "me check" in result.stdout
+    
+    uninstall_alias(global_alias=True)
+
+def test_uninstall_alias_local(tmp_path, monkeypatch):
+    from monitor_everything.hooks import install_alias, uninstall_alias
+    
+    monkeypatch.chdir(tmp_path)
+    subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
+    
+    install_alias(global_alias=False)
+    
+    success, message = uninstall_alias(global_alias=False)
+    assert success == True
+    assert "removed locally" in message
+
+def test_uninstall_alias_not_found(tmp_path, monkeypatch):
+    from monitor_everything.hooks import uninstall_alias
+    
+    monkeypatch.chdir(tmp_path)
+    subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
+    
+    success, message = uninstall_alias(global_alias=False)
+    assert success == False
+    assert "No 'gc' alias found" in message

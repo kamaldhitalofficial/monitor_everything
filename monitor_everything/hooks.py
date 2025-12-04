@@ -45,3 +45,43 @@ def uninstall_hook():
         return True, "Pre-commit hook removed and backup restored"
     
     return True, "Pre-commit hook removed"
+
+def install_alias(global_alias=False):
+    import subprocess
+    
+    git_root = get_git_root()
+    if not git_root and not global_alias:
+        return False, "Not a git repository"
+    
+    scope = "--global" if global_alias else "--local"
+    
+    try:
+        subprocess.run(
+            ["git", "config", scope, "alias.gc", "!me check && git commit"],
+            check=True,
+            capture_output=True
+        )
+        scope_text = "globally" if global_alias else "locally"
+        return True, f"Git alias 'gc' installed {scope_text}"
+    except subprocess.CalledProcessError as e:
+        return False, f"Failed to install alias: {e.stderr.decode()}"
+
+def uninstall_alias(global_alias=False):
+    import subprocess
+    
+    git_root = get_git_root()
+    if not git_root and not global_alias:
+        return False, "Not a git repository"
+    
+    scope = "--global" if global_alias else "--local"
+    
+    try:
+        subprocess.run(
+            ["git", "config", scope, "--unset", "alias.gc"],
+            check=True,
+            capture_output=True
+        )
+        scope_text = "globally" if global_alias else "locally"
+        return True, f"Git alias 'gc' removed {scope_text}"
+    except subprocess.CalledProcessError:
+        return False, "No 'gc' alias found"

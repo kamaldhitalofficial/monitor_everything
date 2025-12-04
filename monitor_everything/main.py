@@ -126,5 +126,34 @@ def uninstall_hook_cmd():
         import sys
         sys.exit(1)
 
+@cli.command(name="install-alias")
+@click.option("--global", "global_alias", is_flag=True, help="Install alias globally")
+def install_alias_cmd(global_alias):
+    """Install git alias 'gc' for commit with checks"""
+    from monitor_everything.hooks import install_alias
+    
+    success, message = install_alias(global_alias)
+    if success:
+        click.echo(f"✓ {message}")
+        click.echo("  Usage: gc -m 'commit message'")
+    else:
+        click.echo(f"✗ {message}")
+        import sys
+        sys.exit(1)
+
+@cli.command(name="uninstall-alias")
+@click.option("--global", "global_alias", is_flag=True, help="Uninstall alias globally")
+def uninstall_alias_cmd(global_alias):
+    """Uninstall git alias 'gc'"""
+    from monitor_everything.hooks import uninstall_alias
+    
+    success, message = uninstall_alias(global_alias)
+    if success:
+        click.echo(f"✓ {message}")
+    else:
+        click.echo(f"✗ {message}")
+        import sys
+        sys.exit(1)
+
 if __name__ == "__main__":
     cli()
