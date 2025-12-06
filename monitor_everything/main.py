@@ -52,6 +52,27 @@ def setup():
         config.save(global_config=False)
         click.echo(f"✓ Local config saved to .merc")
     
+    # Hook and alias installation
+    from monitor_everything.hooks import install_hook, install_alias
+    from monitor_everything.git_utils import is_git_repo
+    
+    if is_git_repo():
+        click.echo("\nGit integration:")
+        if click.confirm("  Install pre-commit hook?", default=True):
+            success, message = install_hook()
+            if success:
+                click.echo(f"  ✓ {message}")
+            else:
+                click.echo(f"  ✗ {message}")
+        
+        if click.confirm("  Install git alias 'gc'?", default=True):
+            install_globally = click.confirm("    Install globally?", default=False)
+            success, message = install_alias(install_globally)
+            if success:
+                click.echo(f"  ✓ {message}")
+            else:
+                click.echo(f"  ✗ {message}")
+    
     click.echo("\n✓ Setup complete!")
 
 @cli.command()
