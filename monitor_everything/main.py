@@ -121,6 +121,66 @@ def config_list():
     config = Config()
     click.echo(json.dumps(config.data, indent=2))
 
+@config.command(name="set")
+@click.argument("key")
+@click.argument("value")
+def config_set(key, value):
+    """Set configuration value"""
+    from monitor_everything.config import Config
+    import sys
+    
+    config = Config()
+    
+    # Convert string value to appropriate type
+    if value.lower() == "true":
+        value = True
+    elif value.lower() == "false":
+        value = False
+    
+    config.set(key, value)
+    config.save()
+    
+    click.echo(f"✓ Set {key} = {value}")
+
+@config.command(name="add-protected")
+@click.argument("branch")
+def config_add_protected(branch):
+    """Add protected branch"""
+    from monitor_everything.config import Config
+    
+    config = Config()
+    protected = config.get("protected_branches", [])
+    
+    if branch in protected:
+        click.echo(f"Branch '{branch}' is already protected")
+        return
+    
+    protected.append(branch)
+    config.set("protected_branches", protected)
+    config.save()
+    
+    click.echo(f"✓ Added '{branch}' to protected branches")
+
+@config.command(name="remove-protected")
+@click.argument("branch")
+def config_remove_protected(branch):
+    """Remove protected branch"""
+    from monitor_everything.config import Config
+    import sys
+    
+    config = Config()
+    protected = config.get("protected_branches", [])
+    
+    if branch not in protected:
+        click.echo(f"✗ Branch '{branch}' is not in protected branches")
+        sys.exit(1)
+    
+    protected.remove(branch)
+    config.set("protected_branches", protected)
+    config.save()
+    
+    click.echo(f"✓ Removed '{branch}' from protected branches")
+
 @cli.command(name="install-hook")
 def install_hook_cmd():
     """Install pre-commit git hook"""
