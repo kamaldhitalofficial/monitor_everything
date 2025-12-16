@@ -2,8 +2,10 @@
 
 echo "Installing Monitor Everything (me)..."
 
-if ! command -v uv &> /dev/null; then
-    echo "Error: uv is not installed. Install it first: curl -LsSf https://astral.sh/uv/install.sh | sh"
+if ! command -v pipx &> /dev/null; then
+    echo "Error: pipx is not installed. Install it first:"
+    echo "  macOS: brew install pipx"
+    echo "  Linux: python3 -m pip install --user pipx"
     exit 1
 fi
 
@@ -24,32 +26,30 @@ else
     cd "$INSTALL_DIR"
 fi
 
-echo "Setting up virtual environment..."
-uv venv .venv
-source .venv/bin/activate
-
-echo "Installing package..."
-uv pip install -e .
+echo "Installing package globally with pipx..."
+pipx install -e "$INSTALL_DIR" --force
 
 SHELL_CONFIG=""
-if [ -n "$ZSH_VERSION" ]; then
+if [ -n "$FISH_VERSION" ]; then
+    SHELL_CONFIG="${HOME}/.config/fish/config.fish"
+elif [ -n "$ZSH_VERSION" ]; then
     SHELL_CONFIG="${HOME}/.zshrc"
 elif [ -n "$BASH_VERSION" ]; then
     SHELL_CONFIG="${HOME}/.bashrc"
+elif [ -f "${HOME}/.config/fish/config.fish" ]; then
+    SHELL_CONFIG="${HOME}/.config/fish/config.fish"
 elif [ -f "${HOME}/.zshrc" ]; then
     SHELL_CONFIG="${HOME}/.zshrc"
 elif [ -f "${HOME}/.bashrc" ]; then
     SHELL_CONFIG="${HOME}/.bashrc"
 fi
 
+echo "✓ Installation complete!"
+echo "The 'me' command is now available globally."
+echo ""
 if [ -n "$SHELL_CONFIG" ]; then
-    if ! grep -q "alias me=" "$SHELL_CONFIG"; then
-        echo "alias me='${INSTALL_DIR}/.venv/bin/me'" >> "$SHELL_CONFIG"
-        echo "✓ Added 'me' alias to $SHELL_CONFIG"
-    fi
-    echo "✓ Installation complete!"
-    echo "Run: source $SHELL_CONFIG && me setup"
+    echo "Restart your terminal or run: source $SHELL_CONFIG"
+    echo "Then run: me setup"
 else
-    echo "✓ Installation complete!"
-    echo "Run: ${INSTALL_DIR}/.venv/bin/me setup"
+    echo "Run: me setup"
 fi
