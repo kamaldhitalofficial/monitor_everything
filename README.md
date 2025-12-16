@@ -4,11 +4,21 @@ Comprehensive pre-commit validation tool with code quality, testing, and securit
 
 ## Installation
 
+### Quick Install (one command)
+
 ```bash
+curl -sSL https://raw.githubusercontent.com/kamaldhitalofficial/monitor_everything/main/install.sh | bash
+```
+
+### Manual Install
+
+```bash
+git clone https://github.com/kamaldhitalofficial/monitor_everything.git
 cd monitor_everything
 uv venv .venv
 source .venv/bin/activate
 uv pip install -e .
+me setup
 ```
 
 ## Quick Start
