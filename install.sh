@@ -32,7 +32,11 @@ echo "Installing package..."
 uv pip install -e .
 
 SHELL_CONFIG=""
-if [ -f "${HOME}/.zshrc" ]; then
+if [ -n "$ZSH_VERSION" ]; then
+    SHELL_CONFIG="${HOME}/.zshrc"
+elif [ -n "$BASH_VERSION" ]; then
+    SHELL_CONFIG="${HOME}/.bashrc"
+elif [ -f "${HOME}/.zshrc" ]; then
     SHELL_CONFIG="${HOME}/.zshrc"
 elif [ -f "${HOME}/.bashrc" ]; then
     SHELL_CONFIG="${HOME}/.bashrc"
@@ -43,7 +47,9 @@ if [ -n "$SHELL_CONFIG" ]; then
         echo "alias me='${INSTALL_DIR}/.venv/bin/me'" >> "$SHELL_CONFIG"
         echo "✓ Added 'me' alias to $SHELL_CONFIG"
     fi
+    echo "✓ Installation complete!"
+    echo "Run: source $SHELL_CONFIG && me setup"
+else
+    echo "✓ Installation complete!"
+    echo "Run: ${INSTALL_DIR}/.venv/bin/me setup"
 fi
-
-echo "✓ Installation complete!"
-echo "Run 'source $SHELL_CONFIG' or restart your terminal, then run: me setup"
