@@ -107,6 +107,45 @@ def check():
     click.echo("\n✓ All checks passed!")
     sys.exit(0)
 
+@cli.command()
+@click.option('-m', '--message', required=True, help='Commit message')
+def commit(message):
+    """Run checks and commit if they pass"""
+    from monitor_everything.config import Config
+    from monitor_everything.runner import CheckRunner
+    from monitor_everything.prompt import display_results, prompt_user_action
+    from monitor_everything.git_utils import is_git_repo
+    import subprocess
+    import sys
+    
+    if not is_git_repo():
+        click.echo("Error: Not a git repository")
+        sys.exit(1)
+    
+    config = Config()
+    runner = CheckRunner(config)
+    
+    click.echo("Running checks...")
+    results = runner.run_all_checks()
+    
+    display_results(results)
+    
+    if runner.should_block(results):
+        click.echo("\nCommit blocked")
+        sys.exit(1)
+    
+    has_issues = any(c['result'].value == 'fail' for c in results['checks'])
+    if has_issues:
+        if not prompt_user_action(results):
+            click.echo("\nCommit aborted")
+            sys.exit(1)
+    
+    click.echo("\n✓ All checks passed!")
+    click.echo("Committing...")
+    
+    result = subprocess.run(["git", "commit", "-m", message])
+    sys.exit(result.returncode)
+
 @cli.group()
 def config():
     """Manage configuration settings"""
